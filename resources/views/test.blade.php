@@ -10,5 +10,4 @@
         <h1 class="text-benin-yellow text-4xl font-bold">Tourisme Bénin KASSOUIN HUGUES</h1>
         <p class="text-white text-lg">Plateforme de tourisme fonctionnelle!</p>
     </div>
-</body>
-</html>
+</body> 
