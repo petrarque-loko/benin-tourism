@@ -7,7 +7,7 @@
 </head>
 <body class="bg-benin-green">
     <div class="container mx-auto p-4">
-        <h1 class="text-benin-yellow text-4xl font-bold">Tourisme Bénin LOKO PÉTRARQUE</h1>
+        <h1 class="text-benin-yellow text-4xl font-bold">Tourisme Bénin KASSOUIN HUGUES</h1>
         <p class="text-white text-lg">Plateforme de tourisme fonctionnelle!</p>
     </div>
 </body>
