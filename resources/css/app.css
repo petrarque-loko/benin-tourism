@@ -1,3 +1,22 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Styles personnalisés */
+@layer components {
+    .btn {
+        @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors;
+    }
+    
+    .btn-primary {
+        @apply bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500;
+    }
+    
+    .btn-secondary {
+        @apply bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-emerald-500;
+    }
+    
+    .form-input {
+        @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500;
+    }
+}

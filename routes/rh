@@ -1,0 +1,559 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Chambre extends Model
+{
+    use HasFactory;
+    
+    protected $fillable = [
+        'numero',
+        'nom',
+        'description',
+        'type_chambre',
+        'capacite',
+        'prix',
+        'est_disponible',
+        'est_visible',
+        'hebergement_id',
+    ];
+    
+    // Relation avec l'hébergement
+    public function hebergement()
+    {
+        return $this->belongsTo(Hebergement::class);
+    }
+    
+    // Relation avec les équipements
+    public function equipements()
+    {
+        return $this->belongsToMany(Equipement::class, 'chambre_equipement');
+    }
+    
+    // Relation avec les réservations
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class);
+    }
+    
+    // Relation avec les médias (photos)
+    public function medias()
+    {
+        return $this->morphMany(Media::class, 'mediable');
+    }
+    
+    // Méthode pour vérifier la disponibilité entre deux dates
+    public function estDisponible($dateDebut, $dateFin)
+    {
+        if (!$this->est_disponible || !$this->est_visible) {
+            return false;
+        }
+        
+        // Vérifier s'il n'y a pas de réservation qui chevauche cette période
+        $reservationsConflictuelles = $this->reservations()
+            ->where(function ($query) use ($dateDebut, $dateFin) {
+                $query->where(function ($q) use ($dateDebut, $dateFin) {
+                    $q->where('date_debut', '<=', $dateFin)
+                      ->where('date_fin', '>=', $dateDebut);
+                });
+            })
+            ->where('statut', '!=', 'annulee')
+            ->count();
+        
+        return $reservationsConflictuelles === 0;
+    }
+}
+
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Commentaire extends Model
+{
+    use HasFactory;
+    
+    protected $fillable = [
+        'contenu',
+        'note',
+        'user_id',
+        'commentable_id',
+        'commentable_type',
+        'is_hidden'
+    ];
+
+    protected $casts = [
+        'note' => 'integer',
+        'is_hidden' => 'boolean'
+    ];
+    
+    /**
+     * Get the parent commentable model.
+     */
+    public function commentable()
+    {
+        return $this->morphTo();
+    }
+    
+    /**
+     * Get the user that owns the comment.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+    // Méthode pour masquer/afficher un commentaire
+    public function toggleVisibilite()
+    {
+        $this->is_hidden = !$this->is_hidden;
+        return $this->save();
+    }
+}
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Equipement extends Model
+{
+    use HasFactory;
+    
+    protected $fillable = [
+        'nom',
+        'description',
+        'icone',
+    ];
+    
+    // Relation avec les chambres
+    public function chambres()
+    {
+        return $this->belongsToMany(Chambre::class, 'chambre_equipement');
+    }
+}
+
+
+<?php
+
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Hebergement extends Model
+{
+    use HasFactory;
+    
+    protected $fillable = [
+        'nom',
+        'description',
+        'adresse',
+        'ville',
+        'latitude', 
+        'longitude',
+        'prix_min',
+        'prix_max',
+        'disponibilite',
+        'proprietaire_id',
+        'type_hebergement_id',
+    ];
+    
+    // Relation avec le propriétaire (User)
+    public function proprietaire()
+    {
+        return $this->belongsTo(User::class, 'proprietaire_id');
+    }
+    
+    // Relation avec le type d'hébergement
+    public function typeHebergement()
+    {
+        return $this->belongsTo(TypeHebergement::class, 'type_hebergement_id');
+    }
+    
+    // Relation avec les chambres
+    public function chambres()
+    {
+        return $this->hasMany(Chambre::class);
+    }
+    
+    // Relation avec les commentaires
+    public function commentaires()
+    {
+        return $this->morphMany(Commentaire::class, 'commentable');
+    }
+    
+    // Relation avec les médias (photos)
+    public function medias()
+    {
+        return $this->morphMany(Media::class, 'mediable');
+    }
+    
+    // Méthode pour obtenir la note moyenne
+    public function noteMoyenne()
+    {
+        return $this->commentaires()->avg('note') ?: 0;
+    }
+    
+    // Méthode pour obtenir les chambres disponibles entre deux dates
+    public function chambresDisponibles($dateDebut, $dateFin, $capacite = null)
+    {
+        $chambres = $this->chambres()
+            ->where('est_disponible', true)
+            ->where('est_visible', true);
+        
+        if ($capacite) {
+            $chambres->where('capacite', '>=', $capacite);
+        }
+        
+        return $chambres->get()->filter(function ($chambre) use ($dateDebut, $dateFin) {
+            return $chambre->estDisponible($dateDebut, $dateFin);
+        });
+    }
+}
+
+
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Media extends Model
+{
+    use HasFactory;
+    
+    protected $table = 'medias';
+    
+    protected $fillable = [
+        'type',
+        'url',
+        'mediable_id',
+        'mediable_type'
+    ];
+    /**
+     * Get the parent mediable model.
+     */
+    public function mediable()
+    {
+        return $this->morphTo();
+    }
+}
+
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
+
+class Reservation extends Model
+{
+    use HasFactory;
+    
+    protected $fillable = [
+        'date_debut',
+        'date_fin',
+        'statut',
+        'raison_annulation',
+        'user_id',
+        'guide_id',
+        'chambre_id',
+        'reservable_id',
+        'reservable_type',
+        'nombre_personnes',
+        'statut_paiement',
+        'reference_paiement',
+    ];
+    
+    protected $dates = [
+        'date_debut',
+        'date_fin',
+    ];
+
+    public function getDateDebutAttribute($value)
+    {
+        return Carbon::parse($value);
+    }
+
+    public function getDateFinAttribute($value)
+    {
+        return Carbon::parse($value);
+    }
+    
+    // Relation avec l'utilisateur (touriste)
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+    
+    // Relation avec le guide
+    public function guide()
+    {
+        return $this->belongsTo(User::class, 'guide_id');
+    }
+    
+    // Relation avec la chambre
+    public function chambre()
+    {
+        return $this->belongsTo(Chambre::class);
+    }
+    
+    // Relation polymorphique pour d'autres types de réservables
+    public function reservable()
+    {
+        return $this->morphTo();
+    }
+    
+    // Méthode pour calculer le prix total
+    public function prixTotal()
+    {
+        if ($this->chambre) {
+            $nombreJours = $this->date_debut->diffInDays($this->date_fin) + 1;
+            return $this->chambre->prix * $nombreJours;
+        }
+        
+        return 0;
+    }
+    
+    // Méthode pour annuler une réservation
+    public function annuler($raison)
+    {
+        $this->statut = 'annulee';
+        $this->raison_annulation = $raison;
+        return $this->save();
+    }
+    
+    // Méthode pour confirmer le paiement
+    public function confirmerPaiement($reference)
+    {
+        $this->statut = 'confirmee';
+        $this->statut_paiement = 'paye';
+        $this->reference_paiement = $reference;
+        return $this->save();
+    }
+}
+
+    
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Role extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['name'];
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
+
+    public function permissions()
+    {
+        return $this->belongsToMany(Permission::class, 'role_permission');
+    }
+}
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class TypeHebergement extends Model
+{
+    use HasFactory;
+    
+    protected $table = 'types_hebergement';
+    
+    protected $fillable = [
+        'nom',
+        'description',
+    ];
+    
+    // Relation avec les hébergements
+    public function hebergements()
+    {
+        return $this->hasMany(Hebergement::class, 'type_hebergement_id');
+    }
+}
+
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+
+
+
+/**
+ * @method MorphMany notifications()
+ * @method MorphMany unreadNotifications()
+ */
+
+class User extends Authenticatable
+{
+    use HasFactory, Notifiable;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'nom',
+        'prenom',
+        'email',
+        'password',
+        'telephone',
+        'adresse',
+        'role_id',
+        'status',
+        'activation_token',
+        'email_verified_at',
+        'last_login_at',
+    ];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'activation_token',
+    ];
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'last_login_at' => 'datetime',
+    ];
+
+    /**
+     * Get the role that owns the user.
+     */
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    /**
+     * Get the documents for the user.
+     */
+    public function documents()
+    {
+        return $this->hasMany(UserDocument::class);
+    }
+
+    /**
+     * Determine si l'utilisateur est un administrateur.
+     *
+     * @return bool
+     */
+    public function isAdmin()
+    {
+        return $this->role->name === 'Administrateur';
+    }
+
+    /**
+     * Determine si l'utilisateur est un guide touristique.
+     *
+     * @return bool
+     */
+    public function isGuide()
+    {
+        return $this->role->name === 'Guide Touristique';
+    }
+
+    /**
+     * Determine si l'utilisateur est un propriétaire d'hébergement.
+     *
+     * @return bool
+     */
+    public function isProprietaire()
+    {
+        return $this->role->name === 'Propriétaire Hébergement';
+    }
+
+    /**
+     * Determine si l'utilisateur est un touriste.
+     *
+     * @return bool
+     */
+    public function isTouriste()
+    {
+        return $this->role->name === 'Touriste';
+    }
+
+    /**
+     * Determine si le compte de l'utilisateur est actif.
+     *
+     * @return bool
+     */
+    public function isActive()
+    {
+        return $this->status === 'active';
+    }
+   
+    public function commentaires()
+    {
+        return $this->morphMany(Commentaire::class, 'commentable');
+    }
+    
+    /**
+     * Obtenir les commentaires faits par cet utilisateur.
+     */
+    public function commentairesFaits()
+    {
+        return $this->hasMany(Commentaire::class, 'user_id');
+    }
+
+    // Relation avec les hébergements dont l'utilisateur est propriétaire
+    public function hebergements()
+    {
+        return $this->hasMany(Hebergement::class, 'proprietaire_id');
+    }
+
+    // Relation avec les réservations faites par l'utilisateur
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class, 'user_id');
+    }
+
+    // Relation avec les réservations pour lesquelles l'utilisateur est guide
+    public function reservationsGuide()
+    {
+        return $this->hasMany(Reservation::class, 'guide_id');
+    }
+
+    
+} 

@@ -1,0 +1,820 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.1deb3
+-- https://www.phpmyadmin.net/
+--
+-- Hôte : localhost:3306
+-- Généré le : ven. 07 mars 2025 à 17:06
+-- Version du serveur : 8.0.41-0ubuntu0.24.04.1
+-- Version de PHP : 8.3.6
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Base de données : `benin-tourisme`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `admin_notifications`
+--
+
+CREATE TABLE `admin_notifications` (
+  `id` bigint UNSIGNED NOT NULL,
+  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `notifiable_id` bigint UNSIGNED NOT NULL,
+  `message` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `read` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `articles`
+--
+
+CREATE TABLE `articles` (
+  `id` bigint UNSIGNED NOT NULL,
+  `titre` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `contenu` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `auteur_id` bigint UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `categories`
+--
+
+CREATE TABLE `categories` (
+  `id` bigint UNSIGNED NOT NULL,
+  `nom` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `categories`
+--
+
+INSERT INTO `categories` (`id`, `nom`, `description`, `created_at`, `updated_at`) VALUES
+(1, 'Monuments historiques', 'Sites et bâtiments d\'importance historique et culturelle.', '2025-02-28 23:39:35', '2025-02-28 23:39:35'),
+(2, 'Parcs naturels', 'Espaces naturels protégés offrant une biodiversité unique.', '2025-02-28 23:39:35', '2025-02-28 23:39:35'),
+(3, 'Musées', 'Institutions présentant des collections d\'art, d\'histoire ou de science.', '2025-02-28 23:39:35', '2025-02-28 23:39:35'),
+(4, 'Plages', 'Zones côtières aménagées pour la baignade et les loisirs.', '2025-02-28 23:39:35', '2025-02-28 23:39:35'),
+(5, 'Sites religieux', 'Lieux de culte et sites spirituels importants.', '2025-02-28 23:39:35', '2025-02-28 23:39:35');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `circuits`
+--
+
+CREATE TABLE `circuits` (
+  `id` bigint UNSIGNED NOT NULL,
+  `titre` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `duree` int NOT NULL,
+  `prix` decimal(10,2) NOT NULL,
+  `guide_id` bigint UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `circuit_site_touristique`
+--
+
+CREATE TABLE `circuit_site_touristique` (
+  `id` bigint UNSIGNED NOT NULL,
+  `circuit_id` bigint UNSIGNED NOT NULL,
+  `sites_touristique_id` bigint UNSIGNED NOT NULL,
+  `ordre` int DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `commentaires`
+--
+
+CREATE TABLE `commentaires` (
+  `id` bigint UNSIGNED NOT NULL,
+  `contenu` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `note` int DEFAULT NULL,
+  `user_id` bigint UNSIGNED NOT NULL,
+  `commentable_id` bigint UNSIGNED NOT NULL,
+  `commentable_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `is_hidden` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `commentaires`
+--
+
+INSERT INTO `commentaires` (`id`, `contenu`, `note`, `user_id`, `commentable_id`, `commentable_type`, `is_hidden`, `created_at`, `updated_at`) VALUES
+(1, 'chic', 5, 13, 1, 'App\\Models\\SiteTouristique', 0, '2025-03-05 15:34:52', '2025-03-05 15:34:52'),
+(2, 'TROP CHIC', 5, 14, 1, 'App\\Models\\SiteTouristique', 0, '2025-03-05 15:44:58', '2025-03-05 15:44:58'),
+(3, 'fcfg', 3, 14, 2, 'App\\Models\\SiteTouristique', 0, '2025-03-07 14:06:50', '2025-03-07 14:06:50'),
+(4, 'SUPER COOL', 5, 14, 4, 'App\\Models\\SiteTouristique', 0, '2025-03-07 15:55:01', '2025-03-07 15:55:01');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `evenements`
+--
+
+CREATE TABLE `evenements` (
+  `id` bigint UNSIGNED NOT NULL,
+  `titre` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `date_debut` datetime NOT NULL,
+  `date_fin` datetime NOT NULL,
+  `lieu` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `hebergements`
+--
+
+CREATE TABLE `hebergements` (
+  `id` bigint UNSIGNED NOT NULL,
+  `nom` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `adresse` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `prix_min` decimal(10,2) NOT NULL,
+  `prix_max` decimal(10,2) NOT NULL,
+  `disponibilite` tinyint(1) NOT NULL DEFAULT '1',
+  `proprietaire_id` bigint UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `medias`
+--
+
+CREATE TABLE `medias` (
+  `id` bigint UNSIGNED NOT NULL,
+  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `url` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `mediable_id` bigint UNSIGNED NOT NULL,
+  `mediable_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `medias`
+--
+
+INSERT INTO `medias` (`id`, `type`, `url`, `mediable_id`, `mediable_type`, `created_at`, `updated_at`) VALUES
+(1, 'image', 'sites/2w4ENyzdX2DQVLFGlowC8oSKkZMAe9V06PiIZR1A.jpg', 2, 'App\\Models\\SiteTouristique', '2025-03-01 07:17:42', '2025-03-01 07:17:42'),
+(2, 'image', 'sites/ti3cA4Gg9zslZcMn85aYMoH3oEHQx2u4HHLg7e9E.jpg', 2, 'App\\Models\\SiteTouristique', '2025-03-01 07:17:42', '2025-03-01 07:17:42'),
+(3, 'image', 'sites/WconMoci6382FNXhn8pLaT8jER2UAFpGLTr7qCrQ.jpg', 2, 'App\\Models\\SiteTouristique', '2025-03-01 07:17:42', '2025-03-01 07:17:42'),
+(4, 'image', 'sites/epMaBRIAIhuJidkycMhGjkcivLRHDS84TEoPXa0a.jpg', 2, 'App\\Models\\SiteTouristique', '2025-03-01 07:17:42', '2025-03-01 07:17:42'),
+(9, 'image', 'sites/9LPbCXxDrRg9JNapiIktbQ5bPMolYlto4HZLOid0.jpg', 4, 'App\\Models\\SiteTouristique', '2025-03-03 23:11:49', '2025-03-03 23:11:49');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `migrations`
+--
+
+CREATE TABLE `migrations` (
+  `id` int UNSIGNED NOT NULL,
+  `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `batch` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `migrations`
+--
+
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
+(1, '2019_12_14_000001_create_personal_access_tokens_table', 1),
+(2, '2025_02_25_152637_create_roles_table', 1),
+(3, '2025_02_25_152906_create_permissions_table', 1),
+(4, '2025_02_25_153101_create_role_permission_table', 1),
+(5, '2025_02_25_154640_create_users_table', 1),
+(6, '2025_02_25_154751_create_categories_table', 1),
+(7, '2025_02_25_154856_create_sites_touristiques_table', 1),
+(8, '2025_02_25_154959_create_hebergements_table', 1),
+(9, '2025_02_25_155050_create_circuits_table', 1),
+(10, '2025_02_25_155145_create_circuit_site_touristique_table', 2),
+(11, '2025_02_25_155236_create_evenements_table', 2),
+(12, '2025_02_25_155311_create_articles_table', 2),
+(13, '2025_02_25_155348_create_medias_table', 2),
+(14, '2025_02_25_155425_create_commentaires_table', 2),
+(15, '2025_02_25_155522_create_reservations_table', 2),
+(16, '2025_02_26_084908_create_user_documents_table', 3),
+(17, '2025_02_26_084927_create_admin_notifications_table', 3),
+(18, '2025_02_26_144728_add_last_login_at_to_users_table', 4),
+(19, '2025_02_26_155841_create_notifications_table', 5),
+(20, '2025_02_26_185855_add_activation_token_to_users_table', 6),
+(21, '2025_02_28_005418_create_password_reset_tokens_table', 7),
+(22, '2025_03_01_001147_add_is_hidden_to_commentaires_table', 8),
+(23, '2025_03_01_001443_add_raison_annulation_to_reservations_table', 8);
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `notifications`
+--
+
+CREATE TABLE `notifications` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `notifiable_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `notifiable_id` bigint UNSIGNED NOT NULL,
+  `data` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `read_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `notifications`
+--
+
+INSERT INTO `notifications` (`id`, `type`, `notifiable_type`, `notifiable_id`, `data`, `read_at`, `created_at`, `updated_at`) VALUES
+('0477e8cc-daae-4388-9ad0-c1ea0e3da001', 'App\\Notifications\\NewRegistration', 'App\\Models\\User', 3, '{\"type\":\"registration\",\"message\":\"Nouvelle inscription Guide Touristique en attente d\'approbation: loko lopes\",\"notifiable_id\":16}', '2025-03-07 00:49:33', '2025-03-07 00:22:20', '2025-03-07 00:49:33'),
+('3665cc9c-d91f-4499-a007-9d0b01018665', 'App\\Notifications\\ReservationModifiee', 'App\\Models\\User', 14, '{\"type\":\"reservation_modifiee\",\"reservation_id\":6,\"utilisateur_id\":13,\"utilisateur_nom\":null,\"message\":\"R\\u00e9servation modifi\\u00e9e par un touriste\"}', NULL, '2025-03-05 10:27:51', '2025-03-05 10:27:51'),
+('57085fd6-4bd3-4cc6-bc0f-f429fd94cd66', 'App\\Notifications\\NewRegistration', 'App\\Models\\User', 3, '{\"type\":\"registration\",\"message\":\"Nouvelle inscription Guide Touristique en attente d\'approbation: Hugues Kassouin\",\"notifiable_id\":14}', '2025-02-28 13:00:21', '2025-02-28 12:59:51', '2025-02-28 13:00:21'),
+('714f01a8-b13a-4ec3-bad2-a8adfe6e50e4', 'App\\Notifications\\NewRegistration', 'App\\Models\\User', 3, '{\"type\":\"registration\",\"message\":\"Nouvelle inscription Propri\\u00e9taire H\\u00e9bergement en attente d\'approbation: SILVA LOKO\",\"notifiable_id\":7}', '2025-02-26 22:53:45', '2025-02-26 22:34:44', '2025-02-26 22:53:45'),
+('77a2ae5d-84f0-4758-93fc-20c95003473f', 'App\\Notifications\\NewRegistration', 'App\\Models\\User', 3, '{\"type\":\"registration\",\"message\":\"Nouvelle inscription Guide Touristique en attente d\'approbation: Aim\\u00e9 DOSSOU\",\"notifiable_id\":15}', '2025-03-06 23:57:09', '2025-03-06 13:51:18', '2025-03-06 23:57:09'),
+('9dc58974-a7ac-4d6e-a760-f6f9ec25afa4', 'App\\Notifications\\ReservationAnnulee', 'App\\Models\\User', 14, '{\"type\":\"reservation_annulee\",\"reservation_id\":6,\"utilisateur_id\":13,\"utilisateur_nom\":null,\"message\":\"R\\u00e9servation annul\\u00e9e par un touriste\"}', NULL, '2025-03-05 10:32:53', '2025-03-05 10:32:53'),
+('b0d247f2-ef6c-4733-a18a-ee3e46845f28', 'App\\Notifications\\ReservationCancelled', 'App\\Models\\User', 14, '{\"type\":\"reservation_annulation\",\"message\":\"R\\u00e9servation annul\\u00e9e: AMAZONE\",\"raison_annulation\":\"d\\u00e9sol\\u00e9\",\"reservation_id\":5}', NULL, '2025-03-05 15:21:06', '2025-03-05 15:21:06'),
+('b3f54923-8c06-4248-8e8c-370f5afe64c1', 'App\\Notifications\\ReservationStatusChanged', 'App\\Models\\User', 13, '{\"type\":\"statut_reservation\",\"reservation_id\":3,\"statut\":\"rejet\\u00e9\",\"message\":\"Statut de votre r\\u00e9servation mis \\u00e0 jour\"}', NULL, '2025-03-05 11:02:07', '2025-03-05 11:02:07'),
+('c8c2557e-aec5-4440-9401-7f42f643eae7', 'App\\Notifications\\ReservationAnnulee', 'App\\Models\\User', 14, '{\"type\":\"reservation_annulee\",\"reservation_id\":1,\"utilisateur_id\":13,\"utilisateur_nom\":null,\"message\":\"R\\u00e9servation annul\\u00e9e par un touriste\"}', NULL, '2025-03-05 10:28:06', '2025-03-05 10:28:06'),
+('dac26a2b-b937-49c5-97b6-d9f0a82d82c5', 'App\\Notifications\\NewRegistration', 'App\\Models\\User', 3, '{\"type\":\"registration\",\"message\":\"Nouvelle inscription Propri\\u00e9taire H\\u00e9bergement en attente d\'approbation: D\\u00e9o GOULOME\",\"notifiable_id\":9}', '2025-02-27 12:36:08', '2025-02-27 12:35:47', '2025-02-27 12:36:08'),
+('e0e29cda-a59e-42a0-937b-07553a8751e0', 'App\\Notifications\\NouvelleReservation', 'App\\Models\\User', 14, '{\"type\":\"reservation\",\"reservation_id\":4,\"utilisateur_id\":13,\"utilisateur_nom\":null,\"message\":\"Nouvelle demande de r\\u00e9servation\"}', NULL, '2025-03-05 09:18:14', '2025-03-05 09:18:14'),
+('e7a1aecd-a716-4b24-a511-7ca5f4e43a03', 'App\\Notifications\\ReservationCancelled', 'App\\Models\\User', 13, '{\"type\":\"reservation_annulation\",\"message\":\"R\\u00e9servation annul\\u00e9e: AMAZONE\",\"raison_annulation\":\"d\\u00e9sol\\u00e9\",\"reservation_id\":5}', NULL, '2025-03-05 15:21:05', '2025-03-05 15:21:05'),
+('ef0c8597-c525-4af7-bc67-f92195c1be97', 'App\\Notifications\\NouvelleReservation', 'App\\Models\\User', 14, '{\"type\":\"reservation\",\"reservation_id\":6,\"utilisateur_id\":13,\"utilisateur_nom\":null,\"message\":\"Nouvelle demande de r\\u00e9servation\"}', NULL, '2025-03-05 10:08:25', '2025-03-05 10:08:25'),
+('f9bacfd7-3d60-4fde-bc60-44323dfd4c3b', 'App\\Notifications\\ReservationStatusChanged', 'App\\Models\\User', 13, '{\"type\":\"statut_reservation\",\"reservation_id\":5,\"statut\":\"approuv\\u00e9\",\"message\":\"Statut de votre r\\u00e9servation mis \\u00e0 jour\"}', NULL, '2025-03-05 10:39:10', '2025-03-05 10:39:10'),
+('fcca32b9-6a94-4e5d-92ad-cd2c0cb15cd6', 'App\\Notifications\\ReservationStatusChanged', 'App\\Models\\User', 13, '{\"type\":\"statut_reservation\",\"reservation_id\":4,\"statut\":\"approuv\\u00e9\",\"message\":\"Statut de votre r\\u00e9servation mis \\u00e0 jour\"}', NULL, '2025-03-05 10:44:42', '2025-03-05 10:44:42');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `password_reset_tokens`
+--
+
+CREATE TABLE `password_reset_tokens` (
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `password_reset_tokens`
+--
+
+INSERT INTO `password_reset_tokens` (`email`, `token`, `created_at`) VALUES
+('silvereloko422@gmail.com', '$2y$12$62YogGdcvcBnl6jARyGZmeOJlQym7tQ./BIHwuWwuOa/6o4vQOfj6', '2025-02-28 12:34:56');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `permissions`
+--
+
+CREATE TABLE `permissions` (
+  `id` bigint UNSIGNED NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `personal_access_tokens`
+--
+
+CREATE TABLE `personal_access_tokens` (
+  `id` bigint UNSIGNED NOT NULL,
+  `tokenable_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tokenable_id` bigint UNSIGNED NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `abilities` text COLLATE utf8mb4_unicode_ci,
+  `last_used_at` timestamp NULL DEFAULT NULL,
+  `expires_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `reservations`
+--
+
+CREATE TABLE `reservations` (
+  `id` bigint UNSIGNED NOT NULL,
+  `date_debut` datetime NOT NULL,
+  `date_fin` datetime NOT NULL,
+  `statut` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `raison_annulation` text COLLATE utf8mb4_unicode_ci,
+  `user_id` bigint UNSIGNED NOT NULL,
+  `guide_id` bigint UNSIGNED DEFAULT NULL,
+  `reservable_id` bigint UNSIGNED NOT NULL,
+  `reservable_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `reservations`
+--
+
+INSERT INTO `reservations` (`id`, `date_debut`, `date_fin`, `statut`, `raison_annulation`, `user_id`, `guide_id`, `reservable_id`, `reservable_type`, `created_at`, `updated_at`) VALUES
+(1, '2025-03-02 00:00:00', '2025-03-04 00:00:00', 'terminé', NULL, 13, 14, 2, 'App\\Models\\SiteTouristique', '2025-03-02 08:50:36', '2025-03-03 10:28:03'),
+(2, '2025-03-06 00:00:00', '2025-03-09 00:00:00', 'en_attente', NULL, 13, 14, 1, 'App\\Models\\SiteTouristique', '2025-03-05 09:09:07', '2025-03-05 09:09:07'),
+(3, '2025-03-06 00:00:00', '2025-03-09 00:00:00', 'rejeté', 'JE NE SUIS PAS DISPONIBLE CE JOUR LÀ', 13, 14, 1, 'App\\Models\\SiteTouristique', '2025-03-05 09:13:33', '2025-03-05 11:02:03'),
+(4, '2025-03-06 00:00:00', '2025-03-09 00:00:00', 'terminé', NULL, 13, 14, 1, 'App\\Models\\SiteTouristique', '2025-03-05 09:16:16', '2025-03-05 10:44:36'),
+(5, '2025-03-06 00:00:00', '2025-03-09 00:00:00', 'annulé', 'désolé', 13, 14, 1, 'App\\Models\\SiteTouristique', '2025-03-05 09:20:16', '2025-03-05 15:21:01'),
+(6, '2025-03-06 00:00:00', '2025-03-07 00:00:00', 'annulé', 'Annulée par le touriste', 13, 14, 1, 'App\\Models\\SiteTouristique', '2025-03-05 10:08:14', '2025-03-05 10:32:43');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `roles`
+--
+
+CREATE TABLE `roles` (
+  `id` bigint UNSIGNED NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `roles`
+--
+
+INSERT INTO `roles` (`id`, `name`, `created_at`, `updated_at`) VALUES
+(9, 'Administrateur', '2025-02-25 22:43:19', '2025-02-25 22:43:19'),
+(10, 'Guide Touristique', '2025-02-25 22:43:19', '2025-02-25 22:43:19'),
+(11, 'Propriétaire Hébergement', '2025-02-25 22:43:19', '2025-02-25 22:43:19'),
+(12, 'Touriste', '2025-02-25 22:43:19', '2025-02-25 22:43:19');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `role_permission`
+--
+
+CREATE TABLE `role_permission` (
+  `id` bigint UNSIGNED NOT NULL,
+  `role_id` bigint UNSIGNED NOT NULL,
+  `permission_id` bigint UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `sites_touristiques`
+--
+
+CREATE TABLE `sites_touristiques` (
+  `id` bigint UNSIGNED NOT NULL,
+  `nom` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `localisation` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `latitude` decimal(10,7) NOT NULL,
+  `longitude` decimal(10,7) NOT NULL,
+  `categorie_id` bigint UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `sites_touristiques`
+--
+
+INSERT INTO `sites_touristiques` (`id`, `nom`, `description`, `localisation`, `latitude`, `longitude`, `categorie_id`, `created_at`, `updated_at`) VALUES
+(2, 'AMAZONE', 'AMAZONE AGOJIÉ', 'Cotonou', 6.3702928, 2.3912362, 1, '2025-03-01 07:17:42', '2025-03-01 07:17:42'),
+(4, 'LOKO', 'K,K,KL,LM,', 'CALAVI', 6.4011240, 2.3113050, 2, '2025-03-03 23:11:49', '2025-03-03 23:11:49');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `users`
+--
+
+CREATE TABLE `users` (
+  `id` bigint UNSIGNED NOT NULL,
+  `nom` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `prenom` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email_verified_at` timestamp NULL DEFAULT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `telephone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `adresse` text COLLATE utf8mb4_unicode_ci,
+  `role_id` bigint UNSIGNED NOT NULL,
+  `status` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
+  `last_login_at` timestamp NULL DEFAULT NULL,
+  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `activation_token` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `users`
+--
+
+INSERT INTO `users` (`id`, `nom`, `prenom`, `email`, `email_verified_at`, `password`, `telephone`, `adresse`, `role_id`, `status`, `last_login_at`, `remember_token`, `created_at`, `updated_at`, `activation_token`) VALUES
+(3, 'LOKO', 'Pétrarque', 'lokopetrarque2003@gmail.com', NULL, '$2y$12$Gwcjf3B9if5GH9ptZ3VAYuDgrw.ox6MtDgEllYoNKqpqE6F7OLhMq', NULL, NULL, 9, 'active', '2025-03-07 06:56:26', NULL, '2025-02-25 22:43:19', '2025-03-07 06:56:26', NULL),
+(9, 'GOULOME', 'Déo', 'silvereloko422@gmail.com', NULL, '$2y$12$mGdnK5b0IKcg8hHPyKw0V.BIRLL1FDhaJoN7VuoO1ILJk1Mj8NA0W', '12345678', 'Bidossessi', 11, 'active', '2025-02-27 12:38:33', NULL, '2025-02-27 12:35:47', '2025-02-28 23:29:32', 'GNyA1K7gcJbGT2QHqdhCO1d7nNTuVagfq7yMXn4yxRyziHsD3NqnSutTpMD4'),
+(13, 'Andre', 'kim', 'silvereloko2003@gmail.com', '2025-02-27 22:26:51', '$2y$12$8LWy4JEFe7UcQCTRcySOy.4UY2ovVbELm5hvO2zswzEFhx0oU9zvS', '+54 66125161', 'Dubai', 12, 'active', '2025-03-07 15:35:38', 'ReSXieDYKnVHoDmvpEA7ntjyYi5ebph8mPyIPUOpiIFdzsAUTZSruQq909Sf', '2025-02-27 22:21:48', '2025-03-07 15:35:38', NULL),
+(14, 'Kassouin', 'Hugues', 'footfans2024@gmail.com', NULL, '$2y$12$EvphWAeAytTU2Nlxxlk93ODLhVMuWOljml4gld.b6rmlYMlaFlBmu', '+229 67265365', 'Calavi', 10, 'active', '2025-03-07 14:01:09', 'u23gjr3sUqlbFD9l1EoO5PzhWFSPb2chosbLhtk93mE6k3l89yHsfUgSD05S', '2025-02-28 12:59:51', '2025-03-07 14:01:09', 'Etxy8g6s3SdUmOuYm3rh0cxPKfApBTM6WlUuLC3x3eX9gXNYzfSuETjzdK5g'),
+(15, 'DOSSOU', 'Aimé', 'aime@2024', NULL, '$2y$12$r7iq9pooe24/vbrKJV58UOnpuVuHxsJLypu1glLRGssl.N/mx1gK6', '+376 66125161', 'COMÉ', 10, 'pending', NULL, NULL, '2025-03-06 13:51:18', '2025-03-06 13:51:18', 'CvhX6LEWf96MRthEOPVSgTcxAUC92bkQJwzl28hOZFdFCkUi3bORCTQ10jG7'),
+(16, 'lopes', 'loko', 'lopes@2003', NULL, '$2y$12$4NZGo3E7UuF.DZcxJ52.VeLlTuwnUrTA8i6Nuovd0onlcRel6QA6K', '+375 66125161', 'h hvhb', 10, 'pending', NULL, NULL, '2025-03-07 00:22:20', '2025-03-07 00:22:20', 'dFnZkjBfuTTGTAE4jojQTukJHv2rGagGnRjYxtpVvyXhHgltgtw1sDt85Dtq');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `user_documents`
+--
+
+CREATE TABLE `user_documents` (
+  `id` bigint UNSIGNED NOT NULL,
+  `user_id` bigint UNSIGNED NOT NULL,
+  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `file_path` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` enum('pending','approved','rejected') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `rejection_reason` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `user_documents`
+--
+
+INSERT INTO `user_documents` (`id`, `user_id`, `type`, `file_path`, `status`, `rejection_reason`, `created_at`, `updated_at`) VALUES
+(7, 9, 'Carte d\'identité', 'documents/BVE69N319w7ERNSB0J2VGegOT6pb5JjITJwfrLMc.png', 'approved', NULL, '2025-02-27 12:35:47', '2025-02-27 12:36:17'),
+(8, 9, 'Preuve de propriété', 'documents/2aJpSfEOXTWKQk1nYLZiMxqh0HcSwYEvvbs3IJTs.png', 'approved', NULL, '2025-02-27 12:35:47', '2025-02-27 12:36:17'),
+(9, 14, 'Carte d\'identité', 'documents/dL2X1aeF2EX467IP1uf2bV8rKkXtHUe9WcchTSPI.jpg', 'approved', NULL, '2025-02-28 12:59:51', '2025-02-28 13:02:12'),
+(10, 14, 'Licence de guide', 'documents/C7YwdFLqgx5wfOitl7DQUMuwFG7E90ZCMdURPAUV.jpg', 'approved', NULL, '2025-02-28 12:59:51', '2025-02-28 13:02:12'),
+(11, 15, 'Carte d\'identité', 'documents/ZnBAojHDozPu2UDtzSiuQxGzrvYtXLYAdsp3Ji2J.jpg', 'pending', NULL, '2025-03-06 13:51:18', '2025-03-06 13:51:18'),
+(12, 16, 'Carte d\'identité', 'documents/6GU4HxGefw2dWQvwXnrCOOS7KvPYEuyYmLaGmeJG.jpg', 'pending', NULL, '2025-03-07 00:22:20', '2025-03-07 00:22:20');
+
+--
+-- Index pour les tables déchargées
+--
+
+--
+-- Index pour la table `admin_notifications`
+--
+ALTER TABLE `admin_notifications`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `articles`
+--
+ALTER TABLE `articles`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `articles_auteur_id_foreign` (`auteur_id`);
+
+--
+-- Index pour la table `categories`
+--
+ALTER TABLE `categories`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `circuits`
+--
+ALTER TABLE `circuits`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `circuits_guide_id_foreign` (`guide_id`);
+
+--
+-- Index pour la table `circuit_site_touristique`
+--
+ALTER TABLE `circuit_site_touristique`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `circuit_site_touristique_circuit_id_foreign` (`circuit_id`),
+  ADD KEY `circuit_site_touristique_sites_touristique_id_foreign` (`sites_touristique_id`);
+
+--
+-- Index pour la table `commentaires`
+--
+ALTER TABLE `commentaires`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `commentaires_user_id_foreign` (`user_id`),
+  ADD KEY `commentaires_commentable_id_commentable_type_index` (`commentable_id`,`commentable_type`);
+
+--
+-- Index pour la table `evenements`
+--
+ALTER TABLE `evenements`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `hebergements`
+--
+ALTER TABLE `hebergements`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `hebergements_proprietaire_id_foreign` (`proprietaire_id`);
+
+--
+-- Index pour la table `medias`
+--
+ALTER TABLE `medias`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `medias_mediable_id_mediable_type_index` (`mediable_id`,`mediable_type`);
+
+--
+-- Index pour la table `migrations`
+--
+ALTER TABLE `migrations`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `notifications`
+--
+ALTER TABLE `notifications`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `notifications_notifiable_type_notifiable_id_index` (`notifiable_type`,`notifiable_id`);
+
+--
+-- Index pour la table `password_reset_tokens`
+--
+ALTER TABLE `password_reset_tokens`
+  ADD PRIMARY KEY (`email`);
+
+--
+-- Index pour la table `permissions`
+--
+ALTER TABLE `permissions`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `personal_access_tokens`
+--
+ALTER TABLE `personal_access_tokens`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `personal_access_tokens_token_unique` (`token`),
+  ADD KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`);
+
+--
+-- Index pour la table `reservations`
+--
+ALTER TABLE `reservations`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `reservations_user_id_foreign` (`user_id`),
+  ADD KEY `reservations_reservable_id_reservable_type_index` (`reservable_id`,`reservable_type`),
+  ADD KEY `reservations_guide_id_foreign` (`guide_id`);
+
+--
+-- Index pour la table `roles`
+--
+ALTER TABLE `roles`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `role_permission`
+--
+ALTER TABLE `role_permission`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `role_permission_role_id_foreign` (`role_id`),
+  ADD KEY `role_permission_permission_id_foreign` (`permission_id`);
+
+--
+-- Index pour la table `sites_touristiques`
+--
+ALTER TABLE `sites_touristiques`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `sites_touristiques_categorie_id_foreign` (`categorie_id`);
+
+--
+-- Index pour la table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `users_email_unique` (`email`),
+  ADD KEY `users_role_id_foreign` (`role_id`);
+
+--
+-- Index pour la table `user_documents`
+--
+ALTER TABLE `user_documents`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_documents_user_id_foreign` (`user_id`);
+
+--
+-- AUTO_INCREMENT pour les tables déchargées
+--
+
+--
+-- AUTO_INCREMENT pour la table `admin_notifications`
+--
+ALTER TABLE `admin_notifications`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `articles`
+--
+ALTER TABLE `articles`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `categories`
+--
+ALTER TABLE `categories`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT pour la table `circuits`
+--
+ALTER TABLE `circuits`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `circuit_site_touristique`
+--
+ALTER TABLE `circuit_site_touristique`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `commentaires`
+--
+ALTER TABLE `commentaires`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT pour la table `evenements`
+--
+ALTER TABLE `evenements`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `hebergements`
+--
+ALTER TABLE `hebergements`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `medias`
+--
+ALTER TABLE `medias`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT pour la table `migrations`
+--
+ALTER TABLE `migrations`
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+
+--
+-- AUTO_INCREMENT pour la table `permissions`
+--
+ALTER TABLE `permissions`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `personal_access_tokens`
+--
+ALTER TABLE `personal_access_tokens`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `reservations`
+--
+ALTER TABLE `reservations`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT pour la table `roles`
+--
+ALTER TABLE `roles`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT pour la table `role_permission`
+--
+ALTER TABLE `role_permission`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `sites_touristiques`
+--
+ALTER TABLE `sites_touristiques`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT pour la table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+
+--
+-- AUTO_INCREMENT pour la table `user_documents`
+--
+ALTER TABLE `user_documents`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- Contraintes pour les tables déchargées
+--
+
+--
+-- Contraintes pour la table `articles`
+--
+ALTER TABLE `articles`
+  ADD CONSTRAINT `articles_auteur_id_foreign` FOREIGN KEY (`auteur_id`) REFERENCES `users` (`id`);
+
+--
+-- Contraintes pour la table `circuits`
+--
+ALTER TABLE `circuits`
+  ADD CONSTRAINT `circuits_guide_id_foreign` FOREIGN KEY (`guide_id`) REFERENCES `users` (`id`);
+
+--
+-- Contraintes pour la table `circuit_site_touristique`
+--
+ALTER TABLE `circuit_site_touristique`
+  ADD CONSTRAINT `circuit_site_touristique_circuit_id_foreign` FOREIGN KEY (`circuit_id`) REFERENCES `circuits` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `circuit_site_touristique_sites_touristique_id_foreign` FOREIGN KEY (`sites_touristique_id`) REFERENCES `sites_touristiques` (`id`) ON DELETE CASCADE;
+
+--
+-- Contraintes pour la table `commentaires`
+--
+ALTER TABLE `commentaires`
+  ADD CONSTRAINT `commentaires_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+--
+-- Contraintes pour la table `hebergements`
+--
+ALTER TABLE `hebergements`
+  ADD CONSTRAINT `hebergements_proprietaire_id_foreign` FOREIGN KEY (`proprietaire_id`) REFERENCES `users` (`id`);
+
+--
+-- Contraintes pour la table `reservations`
+--
+ALTER TABLE `reservations`
+  ADD CONSTRAINT `reservations_guide_id_foreign` FOREIGN KEY (`guide_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `reservations_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+--
+-- Contraintes pour la table `role_permission`
+--
+ALTER TABLE `role_permission`
+  ADD CONSTRAINT `role_permission_permission_id_foreign` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `role_permission_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE;
+
+--
+-- Contraintes pour la table `sites_touristiques`
+--
+ALTER TABLE `sites_touristiques`
+  ADD CONSTRAINT `sites_touristiques_categorie_id_foreign` FOREIGN KEY (`categorie_id`) REFERENCES `categories` (`id`);
+
+--
+-- Contraintes pour la table `users`
+--
+ALTER TABLE `users`
+  ADD CONSTRAINT `users_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`);
+
+--
+-- Contraintes pour la table `user_documents`
+--
+ALTER TABLE `user_documents`
+  ADD CONSTRAINT `user_documents_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

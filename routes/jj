@@ -1,0 +1,505 @@
+<?php
+
+namespace App\Policies;
+
+use App\Models\Hebergement;
+use App\Models\User;
+use Illuminate\Auth\Access\HandlesAuthorization;
+
+class HebergementPolicy
+{
+    use HandlesAuthorization;   
+
+    /**
+     * Détermine si l'utilisateur peut voir la liste des hébergements
+     */
+    public function viewAny(User $user)
+    {
+        // Les propriétaires peuvent voir la liste de leurs hébergements
+        // Les admins peuvent voir tous les hébergements
+        return $user->isProprietaire() || $user->isAdmin();
+    }
+
+    /**
+     * Détermine si l'utilisateur peut voir les détails d'un hébergement spécifique
+     * (infos générales, localisation, avis, commentaires, chambres)
+     */
+    public function view(User $user, Hebergement $hebergement)
+    {
+        // Les propriétaires ne peuvent voir que leurs propres hébergements
+        if ($user->isProprietaire()) {
+            return $hebergement->proprietaire_id === $user->id;
+        }
+        
+        // Les admins peuvent voir tous les hébergements
+        return $user->isAdmin();
+    }
+
+    /**
+     * Détermine si l'utilisateur peut voir le catalogue public d'hébergements
+     * Cette méthode est appelée sans authentification nécessaire
+     */
+    public function viewCatalogue(?User $user)
+    {
+        // Tous les utilisateurs (même non connectés) peuvent voir le catalogue
+        return true;
+    }
+    
+    /**
+     * Détermine si l'utilisateur peut créer des hébergements
+     */
+    public function create(User $user)
+    {
+        // Seuls les propriétaires peuvent créer des hébergements
+        return $user->isProprietaire();
+    }
+
+    /**
+     * Détermine si l'utilisateur peut mettre à jour un hébergement
+     */
+    public function update(User $user, Hebergement $hebergement)
+    {
+        // Les propriétaires ne peuvent mettre à jour que leurs propres hébergements
+        if ($user->isProprietaire()) {
+            return $hebergement->proprietaire_id === $user->id;
+        }
+        
+        // Les admins peuvent mettre à jour tous les hébergements
+        return $user->isAdmin();
+    }
+
+    /**
+     * Détermine si l'utilisateur peut supprimer un hébergement
+     */
+    public function delete(User $user, Hebergement $hebergement)
+    {
+        // Les propriétaires ne peuvent supprimer que leurs propres hébergements
+        if ($user->isProprietaire()) {
+            return $hebergement->proprietaire_id === $user->id;
+        }
+        
+        // Les admins peuvent supprimer tous les hébergements
+        return $user->isAdmin();
+    }
+
+    /**
+     * Détermine si l'utilisateur peut gérer les médias d'un hébergement
+     */
+    public function manageMedia(User $user, Hebergement $hebergement)
+    {
+        // Même logique que pour la mise à jour
+        return $this->update($user, $hebergement);
+    }
+}
+
+namespace App\Policies;
+
+use App\Models\Chambre;
+use App\Models\User;
+use Illuminate\Auth\Access\HandlesAuthorization;
+
+class ChambrePolicy
+{
+    use HandlesAuthorization;
+
+    /**
+     * Détermine si l'utilisateur peut voir la liste des chambres
+     */
+    public function viewAny(User $user)
+    {
+        // Les propriétaires et les admins peuvent voir la liste des chambres
+        return $user->isProprietaire() || $user->isAdmin();
+    }
+
+    /**
+     * Détermine si l'utilisateur peut voir le catalogue public des chambres
+     * Cette méthode est appelée sans authentification nécessaire
+     */
+    public function viewCatalogue(?User $user)
+    {
+        // Tous les utilisateurs (même non connectés) peuvent voir le catalogue
+        return true;
+    }
+
+    /**
+     * Détermine si l'utilisateur peut voir les détails d'une chambre spécifique
+     * (infos générales, galerie d'images, liste des réservations)
+     */
+    public function view(User $user, Chambre $chambre)
+    {
+        // Les propriétaires ne peuvent voir que les chambres de leurs hébergements
+        if ($user->isProprietaire()) {
+            return $chambre->hebergement->proprietaire_id === $user->id;
+        }
+        
+        // Les admins peuvent voir toutes les chambres
+        return $user->isAdmin();
+    }
+
+    /**
+     * Détermine si n'importe quel utilisateur peut voir les détails publics d'une chambre
+     * (infos sur l'hébergement, localisation, équipements, avis)
+     */
+    public function viewDetails(?User $user, Chambre $chambre)
+    {
+        // Tous les utilisateurs (même non connectés) peuvent voir les détails publics
+        return true;
+    }
+
+    /**
+     * Détermine si l'utilisateur peut créer des chambres
+     */
+    public function create(User $user, $hebergementId)
+    {
+        // Vérifier si l'hébergement appartient au propriétaire
+        if ($user->isProprietaire()) {
+            $hebergement = \App\Models\Hebergement::find($hebergementId);
+            return $hebergement && $hebergement->proprietaire_id === $user->id;
+        }
+        
+        return $user->isAdmin();
+    }
+
+    /**
+     * Détermine si l'utilisateur peut mettre à jour une chambre
+     */
+    public function update(User $user, Chambre $chambre)
+    {
+        // Les propriétaires ne peuvent mettre à jour que les chambres de leurs hébergements
+        if ($user->isProprietaire()) {
+            return $chambre->hebergement->proprietaire_id === $user->id;
+        }
+        
+        // Les admins peuvent mettre à jour toutes les chambres
+        return $user->isAdmin();
+    }
+
+    /**
+     * Détermine si l'utilisateur peut supprimer une chambre
+     */
+    public function delete(User $user, Chambre $chambre)
+    {
+        // Les propriétaires ne peuvent supprimer que les chambres de leurs hébergements
+        if ($user->isProprietaire()) {
+            return $chambre->hebergement->proprietaire_id === $user->id;
+        }
+        
+        // Les admins peuvent supprimer toutes les chambres
+        return $user->isAdmin();
+    }
+
+    /**
+     * Détermine si l'utilisateur peut gérer les médias d'une chambre
+     */
+    public function manageMedia(User $user, Chambre $chambre)
+    {
+        // Même logique que pour la mise à jour
+        return $this->update($user, $chambre);
+    }
+
+    /**
+     * Détermine si l'utilisateur peut modifier la visibilité d'une chambre
+     */
+    public function toggleVisibility(User $user, Chambre $chambre)
+    {
+        // Même logique que pour la mise à jour
+        return $this->update($user, $chambre);
+    }
+
+    /**
+     * Détermine si l'utilisateur peut modifier la disponibilité d'une chambre
+     */
+    public function toggleAvailability(User $user, Chambre $chambre)
+    {
+        // Même logique que pour la mise à jour
+        return $this->update($user, $chambre);
+    }
+}
+
+namespace App\Policies;
+
+use App\Models\Reservation;
+use App\Models\User;
+use Illuminate\Auth\Access\HandlesAuthorization;
+
+class ReservationPolicy
+{
+    use HandlesAuthorization;
+
+    /**
+     * Détermine si l'utilisateur peut voir la liste des réservations
+     */
+    public function viewAny(User $user)
+    {
+        // Tous les utilisateurs authentifiés peuvent voir leurs propres réservations
+        return true;
+    }
+
+    /**
+     * Détermine si l'utilisateur peut voir les détails d'une réservation spécifique
+     */
+    public function view(User $user, Reservation $reservation)
+    {
+        // Les touristes ne peuvent voir que leurs propres réservations
+        if ($user->isTouriste()) {
+            return $reservation->user_id === $user->id;
+        }
+        
+        // Les propriétaires peuvent voir les réservations liées à leurs hébergements
+        if ($user->isProprietaire()) {
+            return $reservation->chambre->hebergement->proprietaire_id === $user->id;
+        }
+        
+        // Les guides peuvent voir les réservations pour lesquelles ils sont assignés
+        if ($user->isGuide()) {
+            return $reservation->guide_id === $user->id;
+        }
+        
+        // Les admins peuvent voir toutes les réservations
+        return $user->isAdmin();
+    }
+
+    /**
+     * Détermine si l'utilisateur peut créer des réservations
+     */
+    public function create(User $user)
+    {
+        // Tous les touristes peuvent créer des réservations
+        return $user->isTouriste() || $user->isAdmin();
+    }
+
+    /**
+     * Détermine si l'utilisateur peut mettre à jour une réservation
+     */
+    public function update(User $user, Reservation $reservation)
+    {
+        // Les touristes ne peuvent mettre à jour que leurs propres réservations
+        // et seulement si elles sont en attente
+        if ($user->isTouriste()) {
+            return $reservation->user_id === $user->id && $reservation->statut === 'en_attente';
+        }
+        
+        // Les propriétaires ne peuvent pas modifier les réservations
+        if ($user->isProprietaire()) {
+            return false;
+        }
+        
+        // Les guides peuvent mettre à jour les réservations pour lesquelles ils sont assignés
+        if ($user->isGuide()) {
+            return $reservation->guide_id === $user->id;
+        }
+        
+        // Les admins peuvent mettre à jour toutes les réservations
+        return $user->isAdmin();
+    }
+
+    /**
+     * Détermine si l'utilisateur peut annuler une réservation
+     */
+    public function cancel(User $user, Reservation $reservation)
+    {
+        // Les touristes ne peuvent annuler que leurs propres réservations
+        // et seulement si elles ne sont pas déjà annulées ou terminées
+        if ($user->isTouriste()) {
+            return $reservation->user_id === $user->id && 
+                   !in_array($reservation->statut, ['annulee', 'terminee']);
+        }
+        
+        // Les propriétaires ne peuvent pas annuler les réservations
+        if ($user->isProprietaire()) {
+            return false;
+        }
+        
+        // Les admins peuvent annuler toutes les réservations non terminées
+        return $user->isAdmin() && $reservation->statut !== 'terminee';
+    }
+
+    /**
+     * Détermine si l'utilisateur peut confirmer une réservation
+     */
+    public function confirm(User $user, Reservation $reservation)
+    {
+        // Seul le touriste qui a fait la réservation peut la confirmer
+        return $user->isTouriste() && $reservation->user_id === $user->id && 
+               $reservation->statut === 'en_attente';
+    }
+
+    /**
+     * Détermine si l'utilisateur peut accéder aux statistiques des réservations
+     */
+    public function viewStatistics(User $user)
+    {
+        // Seuls les admins peuvent voir les statistiques globales
+        return $user->isAdmin();
+    }
+}
+
+namespace App\Policies;
+
+use App\Models\Reservation;
+use App\Models\User;
+use Illuminate\Auth\Access\HandlesAuthorization;
+
+class PaiementPolicy
+{
+    use HandlesAuthorization;
+
+    /**
+     * Détermine si l'utilisateur peut initier un paiement pour une réservation
+     */
+    public function initier(User $user, Reservation $reservation)
+    {
+        // Seul le touriste qui a fait la réservation peut initier un paiement
+        // et seulement si le paiement est en attente
+        return $user->id === $reservation->user_id && 
+               $user->isTouriste() &&
+               $reservation->statut_paiement === 'en_attente';
+    }
+
+    /**
+     * Détermine si l'utilisateur peut confirmer un paiement pour une réservation (via KkiaPay)
+     */
+    public function confirmer(User $user, Reservation $reservation)
+    {
+        // Seul le touriste qui a fait la réservation peut confirmer un paiement
+        // et seulement si le paiement est en attente
+        return $user->id === $reservation->user_id &&
+               $user->isTouriste() &&
+               $reservation->statut_paiement === 'en_attente';
+    }
+
+    /**
+     * Détermine si l'utilisateur peut voir l'historique de ses paiements
+     */
+    public function historique(User $user)
+    {
+        // Tous les utilisateurs authentifiés peuvent voir leur historique de paiement
+        return true;
+    }
+}
+
+namespace App\Policies;
+
+use App\Models\Commentaire;
+use App\Models\User;
+use Illuminate\Auth\Access\HandlesAuthorization;
+
+class CommentairePolicy
+{
+    use HandlesAuthorization;
+
+    /**
+     * Détermine si l'utilisateur peut voir tous les commentaires
+     */
+    public function viewAny(User $user)
+    {
+        // Tout utilisateur authentifié peut voir les commentaires
+        return true;
+    }
+
+    /**
+     * Détermine si l'utilisateur peut créer un commentaire
+     */
+    public function create(User $user)
+    {
+        // Seuls les touristes peuvent créer des commentaires
+        return $user->isTouriste();
+    }
+
+    /**
+     * Détermine si l'utilisateur peut masquer un commentaire
+     */
+    public function hide(User $user, Commentaire $commentaire)
+    {
+        // Les propriétaires peuvent masquer les commentaires sur leurs hébergements
+        if ($user->isProprietaire()) {
+            return $commentaire->hebergement->proprietaire_id === $user->id;
+        }
+        
+        // Les admins peuvent masquer n'importe quel commentaire
+        return $user->isAdmin();
+    }
+
+    /**
+     * Détermine si l'utilisateur peut supprimer un commentaire
+     */
+    public function delete(User $user, Commentaire $commentaire)
+    {
+        // Les utilisateurs peuvent supprimer leurs propres commentaires
+        if ($user->isTouriste()) {
+            return $commentaire->user_id === $user->id;
+        }
+        
+        // Seuls les admins peuvent supprimer n'importe quel commentaire
+        return $user->isAdmin();
+    }
+}
+
+namespace App\Providers;
+
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
+use App\Models\Hebergement;
+use App\Models\Chambre;
+use App\Models\Reservation;
+use App\Models\Commentaire;
+use App\Policies\HebergementPolicy;
+use App\Policies\ChambrePolicy;
+use App\Policies\ReservationPolicy;
+use App\Policies\PaiementPolicy;
+use App\Policies\CommentairePolicy;
+
+class AuthServiceProvider extends ServiceProvider
+{
+    /**
+     * The policy mappings for the application.
+     *
+     * @var array<class-string, class-string>
+     */
+    protected $policies = [
+        Hebergement::class => HebergementPolicy::class,
+        Chambre::class => ChambrePolicy::class,
+        Reservation::class => ReservationPolicy::class,
+        Commentaire::class => CommentairePolicy::class,
+    ];
+
+    /**
+     * Register any authentication / authorization services.
+     */
+    public function boot(): void
+    {
+        $this->registerPolicies();
+
+        // Définir les gates pour les paiements (car ils ne sont pas liés à un modèle)
+        Gate::define('initier-paiement', [PaiementPolicy::class, 'initier']);
+        Gate::define('confirmer-paiement', [PaiementPolicy::class, 'confirmer']);
+        Gate::define('voir-historique-paiement', [PaiementPolicy::class, 'historique']);
+
+        // Définir d'autres gates si nécessaire
+        Gate::define('view-statistics', function ($user) {
+            return $user->isAdmin();
+        });
+
+        Gate::define('access-admin-panel', function ($user) {
+            return $user->isAdmin();
+        });
+        
+        // Gate pour les notifications
+        Gate::define('receive-reservation-notifications', function ($user) {
+            return $user->isProprietaire();
+        });
+        
+        // Gates pour le catalogue public
+        Gate::define('view-public-catalogue', function (?User $user) {
+            return true; // Accessible à tous, même aux utilisateurs non connectés
+        });
+        
+        // Gate pour le filtrage des chambres
+        Gate::define('filter-chambres', function (?User $user) {
+            return true; // Accessible à tous, même aux utilisateurs non connectés
+        });
+    }
+}
+
+x-for="(media, index) in [{&quot;id&quot;:66,&quot;type&quot;:&quot;image&quot;,&quot;url&quot;:&quot;sites\/19mWcDcvQHci7iPSRQ14BiBcl2bpHtj90lcpezJO.jpg&quot;,&quot;mediable_id&quot;:2,&quot;mediable_type&quot;:&quot;App\\Models\\SiteTouristique&quot;,&quot;created_at&quot;:&quot;2025-03-15T03:34:26.000000Z&quot;,&quot;updated_at&quot;:&quot;2025-03-15T03:34:26.000000Z&quot;},{&quot;id&quot;:67,&quot;type&quot;:&quot;image&quot;,&quot;url&quot;:&quot;sites\/c41YeV5N2bIP07FvjkKzGyh2mzZW3wERbBur3K86.jpg&quot;,&quot;mediable_id&quot;:2,&quot;mediable_type&quot;:&quot;App\\Models\\SiteTouristique&quot;,&quot;created_at&quot;:&quot;2025-03-15T03:34:26.000000Z&quot;,&quot;updated_at&quot;:&quot;2025-03-15T03:34:26.000000Z&quot;}]"
+x-for="(media, index) in [{&quot;site_id&quot;:6,&quot;site_nom&quot;:&quot;Palais Royal d'Abomey&quot;,&quot;media_url&quot;:&quot;http:\/\/localhost:8000\/storage\/sites\/iWjWexMqu8gqzHj1lSUMmStoTgjWeelkeL2NXuzy.jpg&quot;},{&quot;site_id&quot;:8,&quot;site_nom&quot;:&quot;Mus\u00e9e Historique d'Abomey&quot;,&quot;media_url&quot;:&quot;http:\/\/localhost:8000\/storage\/sites\/w93oyvAo4DbUB7VE7TAKgARjTpcBCEHirYiXg9XU.jpg&quot;},{&quot;site_id&quot;:18,&quot;site_nom&quot;:&quot;Village Souterrain d'Agongointo&quot;,&quot;media_url&quot;:&quot;http:\/\/localhost:8000\/storage\/sites\/Ep8p3DH9Bv5BPOsW1lBtYoFooIfoqGDpbYPYB9jB.png&quot;}]"

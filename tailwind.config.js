@@ -1,4 +1,4 @@
-// tailwind.config.js
+/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
     "./resources/**/*.blade.php",
@@ -8,13 +8,16 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'benin-green': '#008751',
-        'benin-yellow': '#FCD116',
-        'benin-red': '#E8112D',
+        // Vous pouvez personnaliser vos couleurs ici
+      },
+      fontFamily: {
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
       },
     },
   },
   plugins: [
     require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/line-clamp'),
   ],
 }

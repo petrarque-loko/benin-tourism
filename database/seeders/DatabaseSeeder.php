@@ -2,21 +2,32 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\CategorieEvenement;
+use App\Models\CategorieTradition;
+use App\Models\Commentaire;
 use Illuminate\Database\Seeder;
+
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
-    public function run(): void
+    public function run()
     {
-        // \App\Models\User::factory(10)->create();
-
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        $this->call([
+            RoleSeeder::class,
+            CategorieSeeder::class, 
+            TypeHebergementSeeder::class,
+            EquipementSeeder::class,
+            ReservationSeeder::class,
+            SitesTouristiquesSeeder::class,
+            HebergementsSeeder::class,
+            ChambreSeeder::class,
+            TouristeSeeder::class,
+            CommentaireHebergementSeeder::class,
+            CategorieEvenement::class,
+            EvenementCulturelSeeder::class,
+            CategorieTradition::class,
+            CircuitSeeder::class,
+            // Autres seeders ici
+        ]);
     }
 }
